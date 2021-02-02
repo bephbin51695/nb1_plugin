@@ -17,7 +17,7 @@ async def bind(session: CommandSession):
     userQQ = str(session.ctx['user_id'])
     name = session.current_arg_text.strip()
     if not name:
-        session.finish('bind [昵称]')
+        session.finish('bind [昵称]\ne.g. bind Iiquidator')
     h = htmlbody(name)
     ifvalid = await h.judge_valid()
     if ifvalid != None:
@@ -33,7 +33,7 @@ async def wn8(session: CommandSession):
     if not name:
         name = await get_name_from_json(userQQ)
         if name == False:
-            session.finish('wn8 [昵称]')
+            session.finish('wn8 [昵称]\ne.g. wn8 Iiquidator')
         h = htmlbody(name)
         await h.judge_valid()
     else:
@@ -97,6 +97,9 @@ class htmlbody:
         except IndexError:
             kb_wn8 = kb_wr = 'N/A'
         try:
+            d_time_list = self.html.xpath(
+                '//*[@id="tankerStats"]/div[7]/div[2]/text()')[0].split()[-11:-6]
+            d_time = ''.join(d_time_list)
             d_wn8 = self.html.xpath(
                 '//*[@id="tankerStats"]/table/tbody/tr[14]/td[3]/text()')[0]
             d_win = self.html.xpath(
@@ -116,7 +119,7 @@ class htmlbody:
 总体胜率:{total_wr}
 千场WN8:{kb_wn8}
 千场胜率:{kb_wr}
-24小时内:
+From {d_time}:
     WN8:{d_wn8}
     Wins/Losses:{d_win}/{d_lose}[{d_wr}]
     平均等级:{d_tier}
