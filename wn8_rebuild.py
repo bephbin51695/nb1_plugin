@@ -1,5 +1,6 @@
 import os
 
+import datetime
 import aiofiles
 import requests_async as requests
 import ujson
@@ -99,7 +100,12 @@ class htmlbody:
         try:
             d_time_list = self.html.xpath(
                 '//*[@id="tankerStats"]/div[7]/div[2]/text()')[0].split()[-11:-6]
-            d_time = ''.join(d_time_list)
+            d_time_str = ''.join(d_time_list)
+            d_time_format = datetime.datetime.strptime(d_time_str,'%B%d,%Y,%I:%M%p')
+            d_time_formated = f'From {datetime.datetime.strftime(d_time_format,"%Y-%m-%d %H:%M")}:'
+        except:
+            d_time_formated = '24h内:'
+        try:
             d_wn8 = self.html.xpath(
                 '//*[@id="tankerStats"]/table/tbody/tr[14]/td[3]/text()')[0]
             d_win = self.html.xpath(
@@ -112,18 +118,19 @@ class htmlbody:
                 '//*[@id="tankerStats"]/table/tbody/tr[2]/td[3]/text()')[0]
             d_damage = self.html.xpath(
                 '//*[@id="tankerStats"]/table/tbody/tr[10]/td[5]/span/text()')[0]
+            d_sum = f'''{d_time_formated}
+    WN8:{d_wn8}
+    Wins/Losses:{d_win}/{d_lose}[{d_wr}]
+    平均等级:{d_tier}
+    场均伤害:{d_damage}'''
         except IndexError:
-            d_wn8 = d_win = d_lose = d_wr = d_tier = d_damage = 'N/A'
+            d_sum = f'24h内暂无数据'
         result = f'''玩家昵称:{self.name}
 总体WN8:{total_wn8}
 总体胜率:{total_wr}
 千场WN8:{kb_wn8}
 千场胜率:{kb_wr}
-From {d_time}:
-    WN8:{d_wn8}
-    Wins/Losses:{d_win}/{d_lose}[{d_wr}]
-    平均等级:{d_tier}
-    场均伤害:{d_damage}
+{d_sum}
 数据源自wotlabs
 输入bind可绑定昵称'''
         return result
