@@ -2,7 +2,7 @@ import os
 
 import datetime
 import aiofiles
-import requests_async as requests
+import requests
 import ujson
 from lxml import etree
 from nonebot import CommandSession, on_command
@@ -29,6 +29,7 @@ async def bind(session: CommandSession):
 
 @on_command('wn8', only_to_me=False)
 async def wn8(session: CommandSession):
+    #session.finish('由于网络封锁，本功能暂时失效')
     userQQ = str(session.ctx['user_id'])
     name = session.current_arg_text.strip()
     if not name:
@@ -73,7 +74,9 @@ class htmlbody:
 
     async def judge_valid(self):
         try:
-            response = await requests.get(self.url)
+            proxies = { "http": "http://127.0.0.1:7890", "https": "http://127.0.0.1:7890" }
+            #response = requests.get(self.url, proxies=proxies)
+            response = requests.get(self.url, timeout=15)
         except:
             return '信号不良,请重试'
         wb_data = response.text
@@ -86,10 +89,15 @@ class htmlbody:
             pass
 
     async def get_wn8(self):
-        total_wn8 = self.html.xpath(
-            '//*[@id="tankerStats"]/table/tbody/tr[14]/td[2]/text()')[0]
-        total_wr = self.html.xpath(
-            '//*[@id="tankerStats"]/table/tbody/tr[3]/td[3]/a/text()')[0]
+        try:
+            total_wn8 = self.html.xpath(
+                '//*[@id="tankerStats"]/table/tbody/tr[14]/td[2]/text()')[0]
+            total_wr = self.html.xpath(
+                '//*[@id="tankerStats"]/table/tbody/tr[3]/td[3]/a/text()')[0]
+        except IndexError:
+            return '玩家不存在'
+        except AttributeError:
+            return '信号不良,请重试\n//TODO'
         try:
             kb_wn8 = self.html.xpath(
                 '//*[@id="tankerStats"]/table/tbody/tr[14]/td[7]/text()')[0]

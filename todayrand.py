@@ -27,10 +27,10 @@ async def todaylen(session: CommandSession):
 	todaylength = await getlength(userQQ)
 	if userQQ == 'all':
 		sendMsg = f'全体成员今日的平均丁丁长度是{abs(todaylength)}cm'
-	elif todaylength <= 0:
-		sendMsg = f'{at}今日的丁丁长度是....今天你是女孩子'
+	elif todaylength < 0:
+		sendMsg = f'{at}今日的牛牛长度是....今天你是女孩子'
 	else:	
-		sendMsg = f'{at}今日的丁丁长度是{todaylength}cm'
+		sendMsg = f'{at}今日的牛牛长度是{todaylength}cm'
 	await session.send(sendMsg)
 
 async def getlength(userQQ):
