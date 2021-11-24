@@ -19,7 +19,7 @@ async def bind(session: CommandSession):
     args = session.current_arg_text.strip().split()
     if len(args) > 1:
         region = args[0]
-        name = args[1]
+        name = " ".join(args[1:])
     elif len(args) == 1:
         name = args[0]
         region = "sea"
@@ -45,7 +45,7 @@ async def wn8(session: CommandSession):
     args = session.current_arg_text.strip().split()
     if len(args) > 1:
         region = args[0]
-        name = args[1]
+        name = " ".join(args[1:])
     elif len(args) == 1:
         name = args[0]
         if name in {"sea", "ru", "cn"}:
