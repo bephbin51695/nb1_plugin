@@ -6,6 +6,7 @@ import requests
 import ujson
 from lxml import etree
 from nonebot import CommandSession, on_command
+from nonebot.log import logger
 
 __plugin_name__ = 'wn8'
 __plugin_usage__ = r"""坦克世界亚服wn8查询/绑定
@@ -137,6 +138,8 @@ class htmlbody:
         except IndexError:
             return '玩家不存在'
         except AttributeError:
+            logger.error("print html:")
+            logger.error(self.html)
             return '信号不良,请重试\n//TODO'
         try:
             kb_wn8 = self.html.xpath(
@@ -194,6 +197,10 @@ class htmlbody:
         except IndexError:
             atk = "7100"
             kb_wr = kb_tier = kb_dmg = "N/A"
+        except AttributeError:
+            logger.error("print html:")
+            logger.error(self.html)
+            return "请重试"
         result = f'''玩家昵称:{self.name}
 战斗力:{atk}
 千场胜率:{kb_wr}
