@@ -1,6 +1,7 @@
-import os
-
 import datetime
+import os
+import traceback
+
 import aiofiles
 import requests
 import ujson
@@ -41,7 +42,6 @@ async def bind(session: CommandSession):
 
 @on_command('wn8', only_to_me=False)
 async def wn8(session: CommandSession):
-    # session.finish('由于网络封锁，本功能暂时失效')
     userQQ = str(session.ctx['user_id'])
     args = session.current_arg_text.strip().split()
     if len(args) > 1:
@@ -138,9 +138,10 @@ class htmlbody:
         except IndexError:
             return '玩家不存在'
         except AttributeError:
+            logger.error(traceback.format_exc())
             logger.error("print html:")
             logger.error(self.html)
-            return '信号不良,请重试\n//TODO'
+            return '信号不良,请重试'
         try:
             kb_wn8 = self.html.xpath(
                 '//*[@id="tankerStats"]/table/tbody/tr[14]/td[7]/text()')[0]
@@ -198,6 +199,7 @@ class htmlbody:
             atk = "7100"
             kb_wr = kb_tier = kb_dmg = "N/A"
         except AttributeError:
+            logger.error(traceback.format_exc())
             logger.error("print html:")
             logger.error(self.html)
             return "请重试"
