@@ -38,7 +38,7 @@ async def mineral(session: CommandSession):
 
 
 @on_command('月矿', aliases='卫星矿', only_to_me=False)
-async def mineral(session: CommandSession):
+async def moonmine(session: CommandSession):
     tup_n = ('烃类', '标准大气', '蒸发岩沉积物', '硅酸盐', '钨', '钛', '钪',
              '钴', '铬', '钒', '镉', '铂', '汞', '铯', '铪', '锝', '镝',
              '钕', '钷', '铥')
@@ -108,6 +108,7 @@ async def col(session: CommandSession):
         await session.finish('参数非法')
     if not id_list:
         await session.finish('未搜索到物品\n缺少物品请私聊我')
+    #await session.send('因ESI功能维护，数据最后更新时间为2021-10-29 17:55:50\n详情见官网公告')
     p_report = get_col(stripped_arg, id_list)
     await session.send(p_report)
 
@@ -123,6 +124,7 @@ async def jita(session: CommandSession):
     if not id_list:
         await session.finish('未搜索到物品\n缺少物品请私聊我')
     p_report = get_price(id_list, name_list)
+    #await session.send('因ESI功能维护，数据最后更新时间为2021-10-29 17:55:50\n详情见官网公告')
     await session.send(p_report)
 
 
@@ -218,6 +220,7 @@ def get_price(id_list: list, name_list: list) -> str:
     if result == '':
         return '未搜索到有效物品\n缺少物品请私聊我\n注:无货物品已过滤'
     result_sum = f'{result}数据源:当前吉他/皮米价格'
+    #result_sum = f'{result}最后更新时间:2021-10-29 17:55:50'
     return result_sum
 
 

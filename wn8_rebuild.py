@@ -18,6 +18,12 @@ bind [昵称]"""
 @on_command('bind', only_to_me=False)
 async def bind(session: CommandSession):
     userQQ = str(session.ctx['user_id'])
+    try:
+        group_id = str(session.ctx['group_id'])
+    except KeyError:
+        group_id = 0
+    if group_id in {'768887710', '721829413'}:
+        return
     args = session.current_arg_text.strip().split()
     if len(args) > 1:
         region = args[0]
@@ -28,10 +34,10 @@ async def bind(session: CommandSession):
     else:
         name = ''
         region = "sea"
-    if region not in {"sea", "ru", "cn"}:
-        session.finish("服务器选择错误，可接受的参数为：sea、ru、cn")
+    if region not in {"sea", "ru", "cn", "eu", "na"}:
+        session.finish("服务器选择错误，可接受的参数为：sea、ru、cn、eu、na")
     if not name:
-        session.finish('bind [server] 昵称\nserver可选参数为cn、sea、ru\ne.g. bind ru Iiquidator')
+        session.finish('bind [server] 昵称\nserver可选参数为sea、ru、cn、eu、na\ne.g. bind ru Liquidator')
     h = htmlbody(name, region)
     ifvalid = await h.judge_valid()
     if ifvalid:
@@ -49,7 +55,7 @@ async def wn8(session: CommandSession):
         name = " ".join(args[1:])
     elif len(args) == 1:
         name = args[0]
-        if name in {"sea", "ru", "cn"}:
+        if name in {"sea", "ru", "cn", "eu", "na"}:
             region = name
             name = ''
         else:
@@ -57,12 +63,12 @@ async def wn8(session: CommandSession):
     else:
         name = ''
         region = "sea"
-    if region not in {"sea", "ru", "cn"}:
-        session.finish("服务器选择错误，可接受的参数为：sea、ru、cn")
+    if region not in {"sea", "ru", "cn", "eu", "na"}:
+        session.finish("服务器选择错误，可接受的参数为：sea、ru、cn、eu、na")
     if not name:
         name = await get_name_from_json(userQQ, region)
         if not name:
-            session.finish('wn8 [server] [昵称]\n默认服务器为亚服\ne.g. wn8 ru Iiquidator')
+            session.finish('wn8 [server] [昵称]\n默认服务器为亚服\ne.g. wn8 ru Liquidator')
         h = htmlbody(name, region)
         await h.judge_valid()
     else:
@@ -87,7 +93,9 @@ async def bind_user(userQQ: str, name: str, region: str):
             "wot_id": {
                 "sea": "",
                 "ru": "",
-                "cn": ""
+                "cn": "",
+                "eu": "",
+                "na": ""
             }
         }
         userStructure['wot_id'][region] = name
