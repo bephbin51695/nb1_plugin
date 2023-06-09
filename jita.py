@@ -3,7 +3,9 @@ import time
 import requests
 import xlrd
 import nonebot
+import pandas as pd
 from nonebot import CommandSession, on_command
+from thefuzz import process
 from typing import Tuple
 
 __plugin_name__ = 'jita'
@@ -11,8 +13,14 @@ __plugin_usage__ = r"""EVE国服市场姬
 价格已包含皮尔米特星系
 查询物品价格：
 jita [物品名称]
+查询植入体套装价格：
+col [套装名称]
 查询即时矿物收购价：
-mineral/矿价"""
+mineral/矿价
+行星产物价格：
+p1/p2/p3/p4
+虫洞洞口信息：
+洞口 [洞口编号]"""
 
 bot = nonebot.get_bot()
 dic = {}
@@ -26,6 +34,26 @@ def init_dict():
     c2 = table.col_values(1, 1)
     global dic
     dic = dict(zip(c2, c1))
+
+    global wh_dic
+    wh_dic = pd.read_excel('./wot/plugins/wh.xls').set_index('Wormhole Type').to_dict(orient='index')
+
+
+@on_command('洞口', only_to_me=False)
+async def wormhole(session: CommandSession):
+    stripped_arg = session.current_arg_text.strip()
+    if not stripped_arg:
+        await session.finish('洞口 [洞口编号]')
+    w_number = stripped_arg.upper()
+    if w_number not in wh_dic:
+        await session.finish('请输入正确的洞口编号\n例:洞口 B449')
+    w = wh_dic[w_number]
+    detail = ''
+    for k,v in w.items():
+        key = k + ':'
+        detail += f'{key}\t{v}\n'
+    result = f'{w_number}\n{detail}'
+    await session.send(result)
 
 
 @on_command('mineral', aliases='矿价', only_to_me=False)
@@ -107,7 +135,7 @@ async def col(session: CommandSession):
     if len(id_list) != 6 and name != '核心加强植入体':
         await session.finish('参数非法')
     if not id_list:
-        await session.finish('未搜索到物品\n缺少物品请私聊我')
+        await session.finish('未搜索到物品\n例:col 高级统御')
     #await session.send('因ESI功能维护，数据最后更新时间为2021-10-29 17:55:50\n详情见官网公告')
     p_report = get_col(stripped_arg, id_list)
     await session.send(p_report)
@@ -122,7 +150,10 @@ async def jita(session: CommandSession):
     name_list = get_full_name(name)
     id_list = get_id_list(name_list)
     if not id_list:
-        await session.finish('未搜索到物品\n缺少物品请私聊我')
+        find = process.extract(name, dic.keys(), limit=3)
+        find_list = [item[0] for item in find]
+        find_str = '\n'.join(find_list)
+        await session.finish(f'未搜索到物品，您要找的是不是:\n{find_str}')
     p_report = get_price(id_list, name_list)
     #await session.send('因ESI功能维护，数据最后更新时间为2021-10-29 17:55:50\n详情见官网公告')
     await session.send(p_report)
