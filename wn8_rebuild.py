@@ -5,14 +5,16 @@ import traceback
 import aiofiles
 import requests
 import ujson
+from requests.adapters import HTTPAdapter
 from lxml import etree
 from nonebot import CommandSession, on_command
 from nonebot.log import logger
 
 __plugin_name__ = 'wn8'
-__plugin_usage__ = r"""坦克世界亚服wn8查询/绑定
-wn8 [昵称]
-bind [昵称]"""
+__plugin_usage__ = r"""坦克世界国服盒子效率/直营服wn8查询/绑定
+wn8 [服务器] [昵称]
+bind [服务器] [昵称]
+例:wn8 cn 追近的战火"""
 
 
 @on_command('bind', only_to_me=False)
@@ -38,6 +40,8 @@ async def bind(session: CommandSession):
         session.finish("服务器选择错误，可接受的参数为：sea、ru、cn、eu、na")
     if not name:
         session.finish('bind [server] 昵称\nserver可选参数为sea、ru、cn、eu、na\ne.g. bind ru Liquidator')
+    if region == "cn":
+        name = session.current_arg_text.strip().split(' ',1)[1]
     h = htmlbody(name, region)
     ifvalid = await h.judge_valid()
     if ifvalid:
@@ -72,6 +76,8 @@ async def wn8(session: CommandSession):
         h = htmlbody(name, region)
         await h.judge_valid()
     else:
+        if region == "cn":
+            name = session.current_arg_text.strip().split(' ',1)[1]
         h = htmlbody(name, region)
         ifvalid = await h.judge_valid()
         if ifvalid:
@@ -123,7 +129,10 @@ class htmlbody:
         try:
             # proxies = {"http": "http://127.0.0.1:7890", "https": "http://127.0.0.1:7890"}
             # response = requests.get(self.url, proxies=proxies)
-            response = requests.get(self.url, timeout=15)
+            req = requests.Session()
+            req.mount('http://', HTTPAdapter(max_retries=3))
+            req.mount('https://', HTTPAdapter(max_retries=3))
+            response = req.get(self.url, timeout=5)
         except:
             return '信号不良,请重试'
         wb_data = response.text
@@ -168,6 +177,18 @@ class htmlbody:
         try:
             d_wn8 = self.html.xpath(
                 '//*[@id="tankerStats"]/table/tbody/tr[14]/td[3]/text()')[0]
+            w_wn8 = self.html.xpath(
+                '//*[@id="tankerStats"]/table/tbody/tr[14]/td[4]/text()')[0]
+            m_wn8 = self.html.xpath(
+                '//*[@id="tankerStats"]/table/tbody/tr[14]/td[5]/text()')[0]
+            m2_wn8 = self.html.xpath(
+                '//*[@id="tankerStats"]/table/tbody/tr[14]/td[6]/text()')[0]
+            if d_wn8 == w_wn8:
+                d_time_formated = '7天内:'
+            if d_wn8 == m_wn8:
+                d_time_formated = '30天内:'
+            if d_wn8 == m2_wn8:
+                d_time_formated = '60天内:'
             d_win = self.html.xpath(
                 '//*[@id="tankerStats"]/table/tbody/tr[3]/td[4]/text()')[0]
             d_lose = self.html.xpath(
